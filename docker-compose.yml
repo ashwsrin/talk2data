@@ -1,0 +1,71 @@
+services:
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      # URL for client-side fetches (browser to backend)
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      - app
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      # Connection strings for MCP servers (service names in docker network)
+      # These env vars need to be read by mcp_manager.py
+      NL2SQL_MCP_URL: http://mcp-nl2sql:8082/sse
+      AGENTIC_MCP_URL: http://mcp-agentic:8081/sse
+      # Pass through other env vars from .env
+      ORACLE_NL2SQL_DSN: ${ORACLE_NL2SQL_DSN}
+      ORACLE_NL2SQL_USER: ${ORACLE_NL2SQL_USER}
+      ORACLE_NL2SQL_PASSWORD: ${ORACLE_NL2SQL_PASSWORD}
+      ORACLE_NL2SQL_WALLET_PATH: /wallet
+      ORACLE_NL2SQL_WALLET_PASSWORD: ${ORACLE_NL2SQL_WALLET_PASSWORD}
+      # Override wallet path for container
+      ORACLE_WALLET_PATH: /wallet
+    env_file:
+      - .env
+    volumes:
+      # Mount local OCI config for SDK authentication (local dev only)
+      - ~/.oci:/root/.oci:ro
+      # Mount Oracle Wallet
+      - ~/Desktop/T2D/Wallet_TECPDATP01:/wallet:ro
+    depends_on:
+      - mcp-nl2sql
+      - mcp-agentic
+
+  mcp-nl2sql:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp_nl2sql
+    ports:
+      - "8082:8082"
+    env_file:
+      - .env
+    environment:
+      PYTHONUNBUFFERED: 1
+      ORACLE_WALLET_PATH: /wallet
+      ORACLE_NL2SQL_WALLET_PATH: /wallet
+    volumes:
+      - ~/.oci:/root/.oci:ro
+      - ~/Desktop/T2D/Wallet_TECPDATP01:/wallet:ro
+
+  mcp-agentic:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp_agentic
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env
+    environment:
+      PYTHONUNBUFFERED: 1
+    volumes:
+      - ~/.oci:/root/.oci:ro

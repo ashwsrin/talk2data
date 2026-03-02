@@ -1,0 +1,38 @@
+# Database
+local_app.db
+*.db-shm
+*.db-wal
+
+# Git Backup
+.git.backup/
+
+# Node/Web
+web/node_modules/
+web/.next/
+web/build/
+web/out/
+node_modules/
+
+# Python Virtual Environments
+mcpenv/
+.mcpenv/
+venv/
+.venv/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.DS_Store
+.cursor/
+.idea/
+.vscode/

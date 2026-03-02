@@ -1,0 +1,307 @@
+@import "tailwindcss";
+
+/* Override Tailwind v4 default: use class-based dark mode instead of prefers-color-scheme */
+@custom-variant dark (&&:where(.dark, .dark *));
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --app-bg: #ffffff;
+  --app-surface: #f9fafb;
+  --app-sidebar-bg: var(--app-surface);
+  --app-sidebar-item-bg: transparent;
+  --app-sidebar-item-hover: #e5e7eb;
+  --app-sidebar-item-text: #374151;
+  --app-selected-border: transparent;
+  --app-text: #111827;
+  --app-text-muted: #6b7280;
+  --app-border: #e5e7eb;
+  --app-accent: #2563eb;
+  --app-message-bg: #f3f4f6;
+  --app-message-text: #111827;
+  --app-message-icon-bg: var(--app-message-bg);
+  --app-user-bubble-bg: #2563eb;
+  --app-user-bubble-text: #ffffff;
+  --app-selected-bg: rgba(37, 99, 235, 0.2);
+  --app-message-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --app-message-border: #e5e7eb;
+  --app-user-message-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --app-user-message-border: transparent;
+}
+
+/* Dark mode via class on html (user toggle) */
+html.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+/* Theme variables: light (default above), dark */
+html[data-theme="light"] {
+  --background: #ffffff;
+  --foreground: #171717;
+  --app-bg: #ffffff;
+  --app-surface: #f9fafb;
+  --app-text: #111827;
+  --app-text-muted: #6b7280;
+  --app-border: #e5e7eb;
+  --app-accent: #2563eb;
+  --app-message-bg: #f3f4f6;
+  --app-message-text: #111827;
+  --app-message-icon-bg: var(--app-message-bg);
+  --app-user-bubble-bg: #2563eb;
+  --app-user-bubble-text: #ffffff;
+  --app-sidebar-item-bg: transparent;
+  --app-sidebar-item-hover: #e5e7eb;
+  --app-sidebar-item-text: #374151;
+  --app-selected-bg: rgba(37, 99, 235, 0.2);
+  --app-message-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --app-message-border: #e5e7eb;
+  --app-user-message-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --app-user-message-border: transparent;
+}
+
+html[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --app-bg: #111827;
+  --app-surface: #1f2937;
+  --app-text: #f9fafb;
+  --app-text-muted: #9ca3af;
+  --app-border: #374151;
+  --app-accent: #3b82f6;
+  --app-message-bg: #1f2937;
+  --app-message-text: #f9fafb;
+  --app-message-icon-bg: var(--app-message-bg);
+  --app-user-bubble-bg: #3b82f6;
+  --app-user-bubble-text: #ffffff;
+  --app-sidebar-item-bg: transparent;
+  --app-sidebar-item-hover: #374151;
+  --app-sidebar-item-text: #9ca3af;
+  --app-selected-bg: rgba(59, 130, 246, 0.25);
+  --app-message-shadow: none;
+  --app-message-border: rgba(255, 255, 255, 0.1);
+  --app-user-message-shadow: none;
+  --app-user-message-border: rgba(255, 255, 255, 0.1);
+}
+
+/* Scrollbar: Basic Dark - use .dark as well since theme adds that class */
+html[data-theme="dark"],
+html.dark[data-theme="dark"] {
+  scrollbar-color: #374151 #111827;
+  scrollbar-width: thin;
+}
+html[data-theme="dark"] ::-webkit-scrollbar,
+html.dark ::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+html[data-theme="dark"] ::-webkit-scrollbar-track,
+html.dark ::-webkit-scrollbar-track {
+  background: #111827 !important;
+}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb,
+html.dark ::-webkit-scrollbar-thumb {
+  background: #374151 !important;
+  border-radius: 4px;
+}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4b5563 !important;
+}
+
+/* Redwood Light (Warm Neutral + Redwood Red) */
+html[data-theme="redwood-light"] {
+  --background: #F6F5F3;
+  --foreground: #1F1F1F;
+  --app-bg: #F6F5F3;
+  --app-surface: #FFFFFF;
+  --app-sidebar-bg: #F2F1EF;
+  --app-border: #D9D6D1;
+  --app-text: #1F1F1F;
+  --app-text-muted: #5E5A54;
+  --app-accent: #C74634;
+  --app-message-bg: #F1F0EE;
+  --app-message-text: #1F1F1F;
+  --app-message-icon-bg: #C74634;
+  --app-user-bubble-bg: #F1F0EE;
+  --app-user-bubble-text: #1F1F1F;
+  --app-sidebar-item-bg: transparent;
+  --app-sidebar-item-hover: #E9E7E3;
+  --app-sidebar-item-text: #5E5A54;
+  --app-selected-bg: #DCD7D0;
+  --app-selected-border: #C74634;
+  --app-message-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --app-message-border: #D9D6D1;
+  --app-user-message-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --app-user-message-border: transparent;
+}
+
+/* Redwood Light (Cool Gray + Teal Accent) */
+html[data-theme="redwood-teal-light"] {
+  --background: #F4F6F8;
+  --foreground: #17212B;
+  --app-bg: #F4F6F8;
+  --app-surface: #FFFFFF;
+  --app-sidebar-bg: #EEF2F5;
+  --app-border: #D6DEE6;
+  --app-text: #17212B;
+  --app-text-muted: #51606F;
+  --app-accent: #0E6F6A;
+  --app-message-bg: #F1F5F8;
+  --app-message-text: #17212B;
+  --app-message-icon-bg: #0E6F6A;
+  --app-user-bubble-bg: #0E6F6A;
+  --app-user-bubble-text: #FFFFFF;
+  --app-sidebar-item-bg: transparent;
+  --app-sidebar-item-hover: #E6EDF3;
+  --app-sidebar-item-text: #51606F;
+  --app-selected-bg: #D7E7E6;
+  --app-selected-border: #0E6F6A;
+  --app-message-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --app-message-border: #D6DEE6;
+  --app-user-message-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --app-user-message-border: transparent;
+}
+
+/* Redwood Dark (Charcoal + Redwood Red) */
+html[data-theme="redwood-dark"] {
+  --background: #202628;
+  --foreground: #F2F4F5;
+  --app-bg: #202628;
+  --app-surface: #262D30;
+  --app-sidebar-bg: #1C2224;
+  --app-border: #354044;
+  --app-text: #F2F4F5;
+  --app-text-muted: #B8C0C4;
+  --app-accent: #C74634;
+  --app-message-bg: #2A3336;
+  --app-message-text: #F2F4F5;
+  --app-message-icon-bg: #C74634;
+  --app-user-bubble-bg: #2A3336;
+  --app-user-bubble-text: #F2F4F5;
+  --app-sidebar-item-bg: transparent;
+  --app-sidebar-item-hover: #242C2F;
+  --app-sidebar-item-text: #B8C0C4;
+  --app-selected-bg: #2B3437;
+  --app-selected-border: #C74634;
+  --app-message-shadow: none;
+  --app-message-border: #354044;
+  --app-user-message-shadow: none;
+  --app-user-message-border: #354044;
+}
+
+/* Scrollbar: Redwood Dark (Charcoal + Redwood Red) */
+html[data-theme="redwood-dark"] {
+  scrollbar-color: #4a5560 #1C2224;
+  scrollbar-width: thin;
+}
+html[data-theme="redwood-dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+html[data-theme="redwood-dark"] ::-webkit-scrollbar-track {
+  background: #1C2224;
+}
+html[data-theme="redwood-dark"] ::-webkit-scrollbar-thumb {
+  background: #4a5560;
+  border-radius: 4px;
+}
+html[data-theme="redwood-dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #5a6570;
+}
+
+/* Redwood Dark (Deep Plum + Teal) */
+html[data-theme="redwood-plum-dark"] {
+  --background: #2A2331;
+  --foreground: #F3F1F6;
+  --app-bg: #2A2331;
+  --app-surface: #322A3A;
+  --app-sidebar-bg: #241D2B;
+  --app-border: #463B52;
+  --app-text: #F3F1F6;
+  --app-text-muted: #C3BDCC;
+  --app-accent: #2F8E9A;
+  --app-message-bg: #3A3144;
+  --app-message-text: #F3F1F6;
+  --app-message-icon-bg: #2F8E9A;
+  --app-user-bubble-bg: #2F8E9A;
+  --app-user-bubble-text: #FFFFFF;
+  --app-sidebar-item-bg: transparent;
+  --app-sidebar-item-hover: #2D2536;
+  --app-sidebar-item-text: #C3BDCC;
+  --app-selected-bg: #3A3144;
+  --app-selected-border: #E0B34A;
+  --app-message-shadow: none;
+  --app-message-border: #463B52;
+  --app-user-message-shadow: none;
+  --app-user-message-border: #463B52;
+}
+
+/* Scrollbar: Redwood Dark (Deep Plum + Teal) */
+html[data-theme="redwood-plum-dark"] {
+  scrollbar-color: #463B52 #241D2B;
+  scrollbar-width: thin;
+}
+html[data-theme="redwood-plum-dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+html[data-theme="redwood-plum-dark"] ::-webkit-scrollbar-track {
+  background: #241D2B;
+}
+html[data-theme="redwood-plum-dark"] ::-webkit-scrollbar-thumb {
+  background: #463B52;
+  border-radius: 4px;
+}
+html[data-theme="redwood-plum-dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #524760;
+}
+
+/* Force user message bubble to match assistant in Redwood Dark (avoids variable resolution issues) */
+html[data-theme="redwood-dark"] [data-message-role="user"] {
+  background-color: #2A3336 !important;
+  color: #F2F4F5 !important;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-app-bg: var(--app-bg);
+  --color-app-surface: var(--app-surface);
+  --color-app-text: var(--app-text);
+  --color-app-text-muted: var(--app-text-muted);
+  --color-app-border: var(--app-border);
+  --color-app-accent: var(--app-accent);
+  --color-app-message-bg: var(--app-message-bg);
+  --color-app-message-text: var(--app-message-text);
+  --color-app-user-bubble-bg: var(--app-user-bubble-bg);
+  --color-app-user-bubble-text: var(--app-user-bubble-text);
+  --color-app-message-icon-bg: var(--app-message-icon-bg);
+  --color-app-selected-bg: var(--app-selected-bg);
+  --color-app-sidebar-bg: var(--app-sidebar-bg);
+  --color-app-sidebar-item-bg: var(--app-sidebar-item-bg);
+  --color-app-sidebar-item-hover: var(--app-sidebar-item-hover);
+  --color-app-sidebar-item-text: var(--app-sidebar-item-text);
+  --color-app-selected-border: var(--app-selected-border);
+  --color-app-message-shadow: var(--app-message-shadow);
+  --color-app-message-border: var(--app-message-border);
+  --color-app-user-message-shadow: var(--app-user-message-shadow);
+  --color-app-user-message-border: var(--app-user-message-border);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+/* Improve readability for chat message content */
+.prose {
+  line-height: 1.7;
+}
+.prose p {
+  line-height: 1.7;
+}
