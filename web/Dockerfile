@@ -21,6 +21,10 @@ COPY . .
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Set default API URL for Docker network so rewrites compile correctly
+ARG API_URL=http://app:8001
+ENV API_URL=$API_URL
+
 # Debug: Check if next exists
 RUN ls -la node_modules/.bin/next || echo "next binary not found in node_modules/.bin"
 
