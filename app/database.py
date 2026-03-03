@@ -256,78 +256,27 @@ async def migrate_mcp_servers_table(conn):
             ('oauth2_scope', 'TEXT'),
         ]
         
-        # If transport_type is missing, this is the old schema - recreate the table
-        # This will also fix the url NOT NULL constraint issue
-        needs_recreate = 'transport_type' not in existing_columns
+        # Just add missing columns
+        added_count = 0
+        for col_name, col_def in new_columns:
+            if col_name not in existing_columns:
+                try:
+                    # Oracle syntax is ALTER TABLE name ADD column_name type
+                    # SQLite supports ALTER TABLE name ADD COLUMN column_name type
+                    # ADD column_name is standard and works in both Oracle and SQLite
+                    await conn.execute(text(f'ALTER TABLE mcp_servers ADD {col_name} {col_def}'))
+                    print(f"[MIGRATION] Added column {col_name} to mcp_servers table")
+                    added_count += 1
+                except Exception as e:
+                    print(f"[MIGRATION] Warning: Could not add column {col_name}: {e}")
+                    import traceback
+                    traceback.print_exc()
         
-        if needs_recreate:
-            print("[MIGRATION] Recreating mcp_servers table to fix schema...")
-            
-            # Step 1: Create new table with correct schema
-            await conn.execute(text("""
-                CREATE TABLE mcp_servers_new (
-                    id INTEGER PRIMARY KEY,
-                    name VARCHAR NOT NULL,
-                    transport_type TEXT NOT NULL DEFAULT 'sse',
-                    url VARCHAR,
-                    api_key VARCHAR,
-                    is_active BOOLEAN NOT NULL,
-                    exclude_optional_params BOOLEAN NOT NULL DEFAULT 0,
-                    include_in_llm BOOLEAN NOT NULL DEFAULT 1,
-                    system_instruction TEXT,
-                    command VARCHAR(512),
-                    args TEXT,
-                    env TEXT,
-                    cwd VARCHAR(1024)
-                )
-            """))
-            
-            # Step 2: Copy data from old table to new table
-            # Only copy columns that exist in both tables
-            old_cols = [col for col in existing_columns if col != 'id']
-            new_cols = ['name', 'transport_type', 'url', 'api_key', 'is_active', 'exclude_optional_params', 'include_in_llm', 'command', 'args', 'env', 'cwd']
-            cols_to_copy = [col for col in old_cols if col in new_cols]
-            
-            if cols_to_copy:
-                cols_str = ', '.join(cols_to_copy)
-                await conn.execute(text(f"""
-                    INSERT INTO mcp_servers_new (id, {cols_str})
-                    SELECT id, {cols_str}
-                    FROM mcp_servers
-                """))
-            else:
-                # If no matching columns, just insert with defaults
-                await conn.execute(text("""
-                    INSERT INTO mcp_servers_new (id, name, transport_type, is_active, include_in_llm)
-                    SELECT id, name, 'sse', is_active, 1
-                    FROM mcp_servers
-                """))
-            
-            # Step 3: Drop old table
-            await conn.execute(text("DROP TABLE mcp_servers"))
-            
-            # Step 4: Rename new table
-            await conn.execute(text("ALTER TABLE mcp_servers_new RENAME TO mcp_servers"))
-            
-            print("[MIGRATION] Successfully recreated mcp_servers table with correct schema")
+        if added_count == 0:
+            print("[MIGRATION] All required columns already exist in mcp_servers table")
         else:
-            # Just add missing columns
-            added_count = 0
-            for col_name, col_def in new_columns:
-                if col_name not in existing_columns:
-                    try:
-                        await conn.execute(text(f'ALTER TABLE mcp_servers ADD COLUMN {col_name} {col_def}'))
-                        print(f"[MIGRATION] Added column {col_name} to mcp_servers table")
-                        added_count += 1
-                    except Exception as e:
-                        print(f"[MIGRATION] Warning: Could not add column {col_name}: {e}")
-                        import traceback
-                        traceback.print_exc()
-            
-            if added_count == 0:
-                print("[MIGRATION] All required columns already exist in mcp_servers table")
-            else:
-                print(f"[MIGRATION] Migration complete: added {added_count} column(s)")
+            print(f"[MIGRATION] Migration complete: added {added_count} column(s)")
+
     except Exception as e:
         print(f"[MIGRATION] Error during migration: {e}")
         import traceback
