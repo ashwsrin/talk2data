@@ -482,7 +482,7 @@ async def seed_app_settings_defaults_v2():
             print("[INIT_DB] app_settings empty, seeding default api_base_url...")
             await session.execute(
                 text("INSERT INTO app_settings (key, value) VALUES (:key, :value)"),
-                {"key": "api_base_url", "value": settings.backend_url or "http://localhost:8000"}
+                {"key": "api_base_url", "value": settings.backend_url or "http://localhost:8001"}
             )
             await session.commit()
             print("[INIT_DB] Seeded api_base_url")

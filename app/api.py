@@ -1027,7 +1027,7 @@ async def get_conversation_messages(
     attachments_by_msg: Dict[int, List[Dict[str, Any]]] = {}
     if msg_ids:
         app_sets = await get_app_settings()
-        base_url = (app_sets.get("api_base_url") or settings.backend_url or "").strip().rstrip("/") or "http://localhost:8000"
+        base_url = (app_sets.get("api_base_url") or settings.backend_url or "").strip().rstrip("/") or "http://localhost:8001"
         att_result = await db.execute(
             select(ChatMessageAttachment).where(ChatMessageAttachment.message_id.in_(msg_ids))
         )

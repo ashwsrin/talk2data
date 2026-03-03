@@ -26,9 +26,9 @@
 │   (Next.js)  │
 └──────┬───────┘
        │ NEXT_PUBLIC_API_URL
-       │ http://localhost:8000
+       │ http://localhost:8001
        ▼
-┌─────────────┐     HTTP (port 8000)
+┌─────────────┐     HTTP (port 8001 ext / 8000 int)
 │   Backend    │◄──── REST API
 │  (FastAPI)   │
 └──┬───────┬───┘
@@ -72,7 +72,7 @@ All four services run as independent Docker containers orchestrated by `docker-c
 | **Dockerfile** | `Dockerfile.backend` |
 | **Base image** | `python:3.11-slim` |
 | **Framework** | FastAPI + Uvicorn |
-| **Port** | `8000` |
+| **Port** | `8001` (external) / `8000` (internal) |
 | **Entry point** | `uvicorn app.main:app --host 0.0.0.0 --port 8000` |
 | **Build context** | `.` (project root) |
 
@@ -159,7 +159,7 @@ graph TD
     APP -->|"depends_on"| NL2SQL["mcp-nl2sql"]
     APP -->|"depends_on"| AGENTIC["mcp-agentic"]
     
-    WEB -.-|"HTTP :8000"| APP
+    WEB -.-|"HTTP :8001"| APP
     APP -.-|"SSE :8082"| NL2SQL
     APP -.-|"SSE :8081"| AGENTIC
 ```
@@ -208,7 +208,7 @@ These environment variables are set directly in `docker-compose.yml` and **overr
 
 | Variable | Container Value | Purpose |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Browser → Backend URL (web) |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8001` | Browser → Backend URL (web) |
 | `NL2SQL_MCP_URL` | `http://mcp-nl2sql:8082/sse` | Backend → NL2SQL MCP (docker network) |
 | `AGENTIC_MCP_URL` | `http://mcp-agentic:8081/sse` | Backend → Agentic MCP (docker network) |
 | `ORACLE_WALLET_PATH` | `/wallet` | Overrides host path for containers |
@@ -271,7 +271,7 @@ docker compose build --no-cache && docker compose up
 | Service | Host Port | Container Port |
 |---|---|---|
 | Frontend | `3000` | `3000` |
-| Backend | `8000` | `8000` |
+| Backend | `8001` | `8000` |
 | NL2SQL MCP | `8082` | `8082` |
 | Agentic MCP | `8081` | `8081` |
 
@@ -279,7 +279,7 @@ docker compose build --no-cache && docker compose up
 
 ```bash
 # Backend health
-curl http://localhost:8000/
+curl http://localhost:8001/
 
 # Frontend (browser)
 open http://localhost:3000

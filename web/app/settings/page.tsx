@@ -254,7 +254,7 @@ export default function SettingsPage() {
       setError(null); // Clear any previous errors on success
     } catch (err) {
       if (isNetworkError(err) || (err instanceof Error && err.name === 'AbortError')) {
-        setError(`Cannot connect to backend at ${apiBaseUrl}. Make sure the backend is running (e.g. uvicorn app.main:app --reload --port 8000).`);
+        setError(`Cannot connect to backend at ${apiBaseUrl}. Make sure the backend is running (e.g. uvicorn app.main:app --reload --port 8001).`);
       } else {
         const errorMessage = err instanceof Error
           ? err.message
@@ -807,7 +807,7 @@ export default function SettingsPage() {
                       value={appSettingsForm.api_base_url}
                       onChange={(e) => setAppSettingsForm((f) => ({ ...f, api_base_url: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-gray-100"
-                      placeholder="http://localhost:8000"
+                      placeholder="http://localhost:8001"
                     />
                   </div>
                   <div>
