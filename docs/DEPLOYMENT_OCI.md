@@ -129,6 +129,13 @@ If you have previously cloned the repository and it is currently running, you mu
 podman-compose down
 ```
 
+To clean up all old containers, images, and volumes:
+```bash
+podman system prune -a -f
+```
+
+
+
 Then pull the latest changes that include the port 8001 update:
 ```bash
 git pull origin main
@@ -138,6 +145,7 @@ Run the following command to start everything anew:
 
 ```bash
 podman-compose up -d --build
+podman-compose build --no-cache
 ```
 
 ### Checking the Status
