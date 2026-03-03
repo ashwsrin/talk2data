@@ -73,6 +73,11 @@ class MCPServer(Base):
     exclude_optional_params = Column(Boolean, default=False, nullable=False)
     include_in_llm = Column(Boolean, default=True, nullable=False)
     system_instruction = Column(Text, nullable=True)
+    # stdio connection params
+    command = Column(String(512), nullable=True)
+    args = Column(Text, nullable=True) # JSON array of args
+    env = Column(Text, nullable=True)  # JSON dict of env vars
+    cwd = Column(String(1024), nullable=True)
     # OAuth 2.0 Client Credentials (optional; used instead of api_key when set)
     oauth2_access_token_url = Column(String(1024), nullable=True)
     oauth2_client_id = Column(String(255), nullable=True)
@@ -241,6 +246,10 @@ async def migrate_mcp_servers_table(conn):
             ('exclude_optional_params', 'BOOLEAN NOT NULL DEFAULT 0'),
             ('include_in_llm', 'BOOLEAN NOT NULL DEFAULT 1'),
             ('system_instruction', 'TEXT'),
+            ('command', 'VARCHAR(512)'),
+            ('args', 'TEXT'),
+            ('env', 'TEXT'),
+            ('cwd', 'VARCHAR(1024)'),
             ('oauth2_access_token_url', 'TEXT'),
             ('oauth2_client_id', 'TEXT'),
             ('oauth2_client_secret', 'TEXT'),
@@ -265,14 +274,18 @@ async def migrate_mcp_servers_table(conn):
                     is_active BOOLEAN NOT NULL,
                     exclude_optional_params BOOLEAN NOT NULL DEFAULT 0,
                     include_in_llm BOOLEAN NOT NULL DEFAULT 1,
-                    system_instruction TEXT
+                    system_instruction TEXT,
+                    command VARCHAR(512),
+                    args TEXT,
+                    env TEXT,
+                    cwd VARCHAR(1024)
                 )
             """))
             
             # Step 2: Copy data from old table to new table
             # Only copy columns that exist in both tables
             old_cols = [col for col in existing_columns if col != 'id']
-            new_cols = ['name', 'transport_type', 'url', 'api_key', 'is_active', 'exclude_optional_params', 'include_in_llm']
+            new_cols = ['name', 'transport_type', 'url', 'api_key', 'is_active', 'exclude_optional_params', 'include_in_llm', 'command', 'args', 'env', 'cwd']
             cols_to_copy = [col for col in old_cols if col in new_cols]
             
             if cols_to_copy:
