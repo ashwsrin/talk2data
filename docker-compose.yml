@@ -16,7 +16,7 @@ services:
       context: .
       dockerfile: Dockerfile.backend
     ports:
-      - "8001:8000"
+      - "8001:8001"
     environment:
       # Connection strings for MCP servers (service names in docker network)
       # These env vars need to be read by mcp_manager.py
