@@ -2,8 +2,8 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Create symlink so Mac absolute paths in ~/.oci/config work inside container
-RUN mkdir -p /Users/ashwins && ln -s /root/.oci /Users/ashwins/.oci
+# Create symlink so Mac and OCI VM absolute paths in ~/.oci/config work inside container
+RUN mkdir -p /Users/ashwins /home/opc && ln -s /root/.oci /Users/ashwins/.oci && ln -s /root/.oci /home/opc/.oci
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \

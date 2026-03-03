@@ -28,8 +28,9 @@ services:
       ORACLE_NL2SQL_PASSWORD: ${ORACLE_NL2SQL_PASSWORD}
       ORACLE_NL2SQL_WALLET_PATH: /wallet
       ORACLE_NL2SQL_WALLET_PASSWORD: ${ORACLE_NL2SQL_WALLET_PASSWORD}
-      # Override wallet path for container
+      # Override wallet and OCI paths for container
       ORACLE_WALLET_PATH: /wallet
+      OCI_CONFIG_FILE: /root/.oci/config
     env_file:
       - .env
     volumes:
@@ -53,6 +54,7 @@ services:
       PYTHONUNBUFFERED: 1
       ORACLE_WALLET_PATH: /wallet
       ORACLE_NL2SQL_WALLET_PATH: /wallet
+      OCI_CONFIG_FILE: /root/.oci/config
     volumes:
       - ~/.oci:/root/.oci:ro
       - ~/Desktop/T2D/Wallet_TECPDATP01:/wallet:ro
@@ -67,5 +69,6 @@ services:
       - .env
     environment:
       PYTHONUNBUFFERED: 1
+      OCI_CONFIG_FILE: /root/.oci/config
     volumes:
       - ~/.oci:/root/.oci:ro
