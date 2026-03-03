@@ -76,7 +76,7 @@ class MCPServer(Base):
     # stdio connection params
     command = Column(String(512), nullable=True)
     args = Column(Text, nullable=True) # JSON array of args
-    env = Column(Text, nullable=True)  # JSON dict of env vars
+    env_vars = Column(Text, nullable=True)  # JSON dict of env vars
     cwd = Column(String(1024), nullable=True)
     # OAuth 2.0 Client Credentials (optional; used instead of api_key when set)
     oauth2_access_token_url = Column(String(1024), nullable=True)
@@ -248,7 +248,7 @@ async def migrate_mcp_servers_table(conn):
             ('system_instruction', 'TEXT'),
             ('command', 'VARCHAR(512)'),
             ('args', 'TEXT'),
-            ('env', 'TEXT'),
+            ('env_vars', 'TEXT'),
             ('cwd', 'VARCHAR(1024)'),
             ('oauth2_access_token_url', 'TEXT'),
             ('oauth2_client_id', 'TEXT'),

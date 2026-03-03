@@ -498,7 +498,7 @@ class ServerCreate(BaseModel):
     api_key: str | None = None
     command: str | None = None
     args: str | None = None  # JSON string for arguments array
-    env: str | None = None  # JSON string for environment variables dict
+    env_vars: str | None = None  # JSON string for environment variables dict
     cwd: str | None = None
     include_in_llm: bool = True
     system_instruction: str | None = None
@@ -514,7 +514,7 @@ class ServerCreate(BaseModel):
             raise ValueError("transport_type must be 'sse', 'stdio', or 'streamable_http'")
         return v
     
-    @field_validator('args', 'env')
+    @field_validator('args', 'env_vars')
     @classmethod
     def validate_json_fields(cls, v, info):
         if v is None or v == '':
@@ -713,7 +713,7 @@ async def create_server(server: ServerCreate, db: AsyncSession = Depends(get_db)
         
         # Normalize JSON fields: empty strings become None
         args = server.args if server.args and server.args.strip() else None
-        env = server.env if server.env and server.env.strip() else None
+        env_vars = server.env_vars if server.env_vars and server.env_vars.strip() else None
         
         # Normalize system_instruction: empty string becomes None
         system_instruction = (server.system_instruction or "").strip() or None
@@ -730,7 +730,7 @@ async def create_server(server: ServerCreate, db: AsyncSession = Depends(get_db)
             api_key=api_key,
             command=server.command,
             args=args,
-            env=env,
+            env_vars=env_vars,
             cwd=server.cwd if server.cwd and server.cwd.strip() else None,
             is_active=True,
             include_in_llm=getattr(server, "include_in_llm", True),
