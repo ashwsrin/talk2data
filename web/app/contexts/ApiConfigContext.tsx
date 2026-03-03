@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 
-const BOOTSTRAP_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
+const BOOTSTRAP_URL = '';
 
 export interface AppSettings {
   api_base_url: string;

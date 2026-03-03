@@ -130,7 +130,7 @@ export default function SettingsPage() {
       });
     } catch (err) {
       setAppSettingsError(isNetworkError(err) || (err instanceof Error && err.name === 'AbortError')
-        ? `Cannot connect to backend at ${apiBaseUrl}. Make sure the backend is running.`
+        ? `Cannot connect to backend. Make sure the backend is running.`
         : (err instanceof Error ? err.message : 'Failed to load settings'));
     } finally {
       setAppSettingsLoading(false);
@@ -254,7 +254,7 @@ export default function SettingsPage() {
       setError(null); // Clear any previous errors on success
     } catch (err) {
       if (isNetworkError(err) || (err instanceof Error && err.name === 'AbortError')) {
-        setError(`Cannot connect to backend at ${apiBaseUrl}. Make sure the backend is running (e.g. uvicorn app.main:app --reload --port 8001).`);
+        setError(`Cannot connect to backend. Make sure the backend is running (e.g. uvicorn app.main:app --reload --port 8001).`);
       } else {
         const errorMessage = err instanceof Error
           ? err.message
@@ -348,7 +348,7 @@ export default function SettingsPage() {
       await fetchServers();
     } catch (err) {
       if (isNetworkError(err) || (err instanceof Error && err.name === 'AbortError')) {
-        setError(`Cannot connect to backend at ${apiBaseUrl}. Make sure the backend is running.`);
+        setError(`Cannot connect to backend. Make sure the backend is running.`);
       } else {
         const errorMessage = err instanceof Error
           ? err.message
@@ -461,7 +461,7 @@ export default function SettingsPage() {
       await fetchServers();
     } catch (err) {
       if (isNetworkError(err) || (err instanceof Error && err.name === 'AbortError')) {
-        setError(`Cannot connect to backend at ${apiBaseUrl}. Make sure the backend is running.`);
+        setError(`Cannot connect to backend. Make sure the backend is running.`);
       } else {
         const errorMessage = err instanceof Error
           ? err.message
@@ -623,7 +623,7 @@ export default function SettingsPage() {
       await fetchServerTools();
     } catch (err) {
       if (isNetworkError(err) || (err instanceof Error && err.name === 'AbortError')) {
-        setError(`Cannot connect to backend at ${apiBaseUrl}. Make sure the backend is running.`);
+        setError(`Cannot connect to backend. Make sure the backend is running.`);
       } else {
         const errorMessage = err instanceof Error
           ? err.message

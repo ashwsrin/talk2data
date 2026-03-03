@@ -6,8 +6,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # URL for client-side fetches (browser to backend)
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001}
+      # Internal URL for Next.js to proxy `/api/*` requests to the backend
+      API_URL: ${API_URL:-http://app:8001}
     depends_on:
       - app
 
