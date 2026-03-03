@@ -476,7 +476,17 @@ async def seed_app_settings_defaults_v2():
             # Check if ANY settings exist
             result = await session.execute(text("SELECT 1 FROM app_settings FETCH FIRST 1 ROWS ONLY"))
             if result.scalar() is not None:
-                print("[INIT_DB] app_settings table already has data, skipping seed.")
+                print("[INIT_DB] app_settings table already has data. Checking for stale 8000 port...")
+                
+                # Auto-fix stale port 8000 mapping
+                api_url_result = await session.execute(text("SELECT value FROM app_settings WHERE key = 'api_base_url'"))
+                api_url_val = api_url_result.scalar()
+                if api_url_val == "http://localhost:8000":
+                    await session.execute(
+                        text("UPDATE app_settings SET value = 'http://localhost:8001' WHERE key = 'api_base_url'")
+                    )
+                    await session.commit()
+                    print("[INIT_DB] Auto-updated stale api_base_url port 8000 to 8001")
                 return
 
             print("[INIT_DB] app_settings empty, seeding default api_base_url...")
