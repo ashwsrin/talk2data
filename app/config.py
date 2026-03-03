@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     compartment_id: str
     region: str = "us-chicago-1"  # Default OCI region
     backend_url: str = "http://localhost:8001"  # Base URL for file_url so OCI can fetch PDFs (env: BACKEND_URL)
+    cors_origins: str = "http://localhost:3000"  # Comma-separated CORS allowed origins (env: CORS_ORIGINS)
     database_url: str = "sqlite+aiosqlite:///./local_app.db"  # DB connection string (env: DATABASE_URL); restart required to change
     
     # Oracle Autonomous Database for App Persistence

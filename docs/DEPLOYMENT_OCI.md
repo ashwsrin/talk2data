@@ -93,35 +93,57 @@ If you're using a secure Oracle DB (like an Autonomous Database) that requires a
    ```
 2. Copy the wallet zip or extracted contents from your local machine to `~/wallet` on the VM.
 
-### Set up the `.env` file
-1. Create a `.env` file containing your database secrets and API endpoint overrides:
+### Set up the `.env` file (Backend + App DB)
+1. Create a `.env` file containing your database secrets and configuration:
    ```bash
    nano .env
    ```
-2. Add your environment variables. Make sure your paths match the VM's file system:
+2. Add the following environment variables. **Replace placeholder values** with your actual credentials and VM IP:
 
    ```env
-   # Oracle DB Connection
-   ORACLE_NL2SQL_DSN=your_database_dsn_here
-   ORACLE_NL2SQL_USER=your_db_username
-   ORACLE_NL2SQL_PASSWORD=your_db_password
-   # Required if mTLS is enabled
-   ORACLE_NL2SQL_WALLET_PASSWORD=your_wallet_password
-   
-   # OCI Config overrides for the container
+   # OCI SDK Configuration
    OCI_CONFIG_FILE=/root/.oci/config
-   OCI_CONFIG_PROFILE=DEFAULT
-   
-   # Note: To ensure your web browser correctly connects to the backend API,
-   # you can configure Next.js to use your VM's public IP during deployment.
-   NEXT_PUBLIC_API_URL=http://<YOUR_VM_PUBLIC_IP>:8001
+   OCI_PROFILE=DEFAULT
+   COMPARTMENT_ID=<YOUR_COMPARTMENT_OCID>
+
+   # Backend URL (used for attachment URLs returned by the API)
+   BACKEND_URL=http://<YOUR_VM_PUBLIC_IP>:8001
+
+   # CORS allowed origins (comma-separated; must include the frontend URL)
+   CORS_ORIGINS=http://localhost:3000,http://<YOUR_VM_PUBLIC_IP>:3000
+
+   # Application Database (Oracle ADB)
+   ORACLE_DB_DSN=<your_app_db_dsn>
+   ORACLE_DB_USER=<your_app_db_user>
+   ORACLE_DB_PASSWORD=<your_app_db_password>
+   ORACLE_WALLET_PATH=/wallet
+   ORACLE_WALLET_PASSWORD=<your_wallet_password>
    ```
+
+### Set up the `.env.nl2sql` file (NL2SQL MCP Server)
+The NL2SQL MCP server uses a **separate** config file for its Oracle DB connection (which may point to a different schema/user than the app DB).
+
+1. Create `.env.nl2sql`:
+   ```bash
+   nano .env.nl2sql
+   ```
+2. Add:
+   ```env
+   ORACLE_NL2SQL_DSN=<your_nl2sql_db_dsn>
+   ORACLE_NL2SQL_USER=<your_nl2sql_db_user>
+   ORACLE_NL2SQL_PASSWORD=<your_nl2sql_db_password>
+   ORACLE_NL2SQL_WALLET_PATH=/wallet
+   ORACLE_NL2SQL_WALLET_PASSWORD=<your_wallet_password>
+   ```
+
+### Update the `app_settings` table (after first startup)
+After the application starts for the first time, you can customise the **System Prompt** via the Settings page (`http://<YOUR_VM_PUBLIC_IP>:3000/settings`). This is the only setting stored in the database; all other configuration is managed via `.env` files.
 
 ---
 
 ## Step 5: Start the Services
 
-Now you can build and run the multi-container Podman application in **detached mode (in the background)** using the `-d` flag. The `docker-compose.yml` file defaults to port 8001 for the backend.
+Now you can build and run the multi-container Podman application in **detached mode (in the background)** using the `-d` flag.
 
 If you have previously cloned the repository and it is currently running, you must stop the existing containers before pulling new changes and starting them again:
 
@@ -134,9 +156,7 @@ To clean up all old containers, images, and volumes:
 podman system prune -a -f
 ```
 
-
-
-Then pull the latest changes that include the port 8001 update:
+Then pull the latest changes:
 ```bash
 git pull origin main
 ```
@@ -145,7 +165,6 @@ Run the following command to start everything anew:
 
 ```bash
 podman-compose up -d --build
-podman-compose build --no-cache
 ```
 
 ### Checking the Status

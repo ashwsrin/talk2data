@@ -5,10 +5,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 const BOOTSTRAP_URL = '';
 
 export interface AppSettings {
-  api_base_url: string;
-  cors_origins: string;
-  debug_log_path: string;
-  debug_ingest_url: string;
+  system_prompt: string;
 }
 
 interface ApiConfigContextType {
@@ -32,13 +29,11 @@ export function ApiConfigProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch(url);
       if (!response.ok) return;
       const data = await response.json();
-      const base = (data.api_base_url || '').trim() || BOOTSTRAP_URL;
+      // backend_url from env is used for display only; frontend always uses relative URLs
+      const base = (data.backend_url || '').trim() || BOOTSTRAP_URL;
       setApiBaseUrlState(base.replace(/\/+$/, ''));
       setAppSettings({
-        api_base_url: data.api_base_url ?? '',
-        cors_origins: data.cors_origins ?? '',
-        debug_log_path: data.debug_log_path ?? '',
-        debug_ingest_url: data.debug_ingest_url ?? '',
+        system_prompt: data.system_prompt ?? '',
       });
     } catch {
       setApiBaseUrlState(BOOTSTRAP_URL);
@@ -55,7 +50,6 @@ export function ApiConfigProvider({ children }: { children: React.ReactNode }) {
   const setApiBaseUrl = useCallback((url: string) => {
     const base = (url || '').trim().replace(/\/+$/, '') || BOOTSTRAP_URL;
     setApiBaseUrlState(base);
-    setAppSettings((prev) => (prev ? { ...prev, api_base_url: base } : null));
   }, []);
 
   return (

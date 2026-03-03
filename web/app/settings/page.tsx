@@ -50,21 +50,18 @@ interface ModelConfigRow {
 }
 
 export default function SettingsPage() {
-  const { apiBaseUrl, setApiBaseUrl, refreshSettings } = useApiConfig();
+  const { apiBaseUrl, refreshSettings } = useApiConfig();
   const [activeTab, setActiveTab] = useState<SettingsTab>('application');
-  const [appSettingsForm, setAppSettingsForm] = useState({
-    api_base_url: '',
-    cors_origins: '',
-    debug_log_path: '',
-    debug_ingest_url: '',
+  // Read-only env values (displayed but not editable)
+  const [envSettings, setEnvSettings] = useState({
     database_url: '',
     oci_config_file: '',
     oci_profile: '',
-    // New Oracle DB fields
-    oracle_db_dsn: '',
-    oracle_db_user: '',
-    oracle_wallet_path: '',
-    // Custom system prompt
+    backend_url: '',
+    cors_origins: '',
+  });
+  // Editable settings (stored in DB)
+  const [appSettingsForm, setAppSettingsForm] = useState({
     system_prompt: '',
   });
   const [appSettingsLoading, setAppSettingsLoading] = useState(false);
@@ -114,18 +111,14 @@ export default function SettingsPage() {
       const response = await fetch(`${apiBaseUrl}/api/settings`);
       if (!response.ok) throw new Error('Failed to load settings');
       const data = await response.json();
-      setAppSettingsForm({
-        api_base_url: data.api_base_url ?? '',
-        cors_origins: data.cors_origins ?? '',
-        debug_log_path: data.debug_log_path ?? '',
-        debug_ingest_url: data.debug_ingest_url ?? '',
+      setEnvSettings({
         database_url: data.database_url ?? '',
         oci_config_file: data.oci_config_file ?? '',
         oci_profile: data.oci_profile ?? '',
-        // New fields
-        oracle_db_dsn: data.oracle_db_dsn ?? '',
-        oracle_db_user: data.oracle_db_user ?? '',
-        oracle_wallet_path: data.oracle_wallet_path ?? '',
+        backend_url: data.backend_url ?? '',
+        cors_origins: data.cors_origins ?? '',
+      });
+      setAppSettingsForm({
         system_prompt: data.system_prompt ?? '',
       });
     } catch (err) {
@@ -144,25 +137,11 @@ export default function SettingsPage() {
     setAppSettingsSaving(true);
     setAppSettingsError(null);
     setAppSettingsSuccess(null);
-    const url = (appSettingsForm.api_base_url || '').trim().replace(/\/+$/, '');
-    if (!url || (!url.startsWith('http://') && !url.startsWith('https://'))) {
-      setAppSettingsError('API base URL must be a non-empty http(s) URL.');
-      setAppSettingsSaving(false);
-      return;
-    }
     try {
       const response = await fetch(`${apiBaseUrl}/api/settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          api_base_url: url,
-          cors_origins: (appSettingsForm.cors_origins || '').trim(),
-          debug_log_path: (appSettingsForm.debug_log_path || '').trim(),
-          debug_ingest_url: (appSettingsForm.debug_ingest_url || '').trim(),
-          // New fields
-          oracle_db_dsn: (appSettingsForm.oracle_db_dsn || '').trim(),
-          oracle_db_user: (appSettingsForm.oracle_db_user || '').trim(),
-          oracle_wallet_path: (appSettingsForm.oracle_wallet_path || '').trim(),
           system_prompt: (appSettingsForm.system_prompt || '').trim(),
         }),
       });
@@ -170,10 +149,8 @@ export default function SettingsPage() {
         const err = await response.json().catch(() => ({}));
         throw new Error((err as any).detail || response.statusText || 'Failed to save settings');
       }
-      const data = await response.json();
-      setApiBaseUrl(data.api_base_url ?? url);
       await refreshSettings();
-      setAppSettingsSuccess('Settings saved. API base URL is updated for this session.');
+      setAppSettingsSuccess('Settings saved.');
     } catch (err) {
       setAppSettingsError(err instanceof Error ? err.message : 'Failed to save settings');
     } finally {
@@ -650,7 +627,7 @@ export default function SettingsPage() {
               </h1>
               <p className="text-app-text-muted">
                 {activeTab === 'application'
-                  ? 'API base URL, CORS, and debug options'
+                  ? 'System prompt and environment configuration'
                   : 'Manage your Model Context Protocol (MCP) server connections'}
               </p>
             </div>
@@ -702,6 +679,7 @@ export default function SettingsPage() {
                 <p className="text-app-text-muted">Loading settings…</p>
               ) : (
                 <form onSubmit={saveAppSettings} className="space-y-4">
+                  {/* Read-only environment settings */}
                   <div>
                     <label htmlFor="database_url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Database
@@ -710,61 +688,42 @@ export default function SettingsPage() {
                       type="text"
                       id="database_url"
                       readOnly
-                      value={appSettingsForm.database_url}
+                      value={envSettings.database_url}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 cursor-not-allowed"
                     />
                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                       Set via DATABASE_URL in .env; restart required to change.
                     </p>
                   </div>
-
-                  <div className="pt-4 border-t border-gray-200">
-                    <h3 className="text-md font-medium text-gray-900 mb-4">Oracle Autonomous Database (Application Persistence)</h3>
-                    <p className="text-sm text-gray-500 mb-4">
-                      Configure Oracle ADB to replace SQLite. Requires restart to take effect.
+                  <div>
+                    <label htmlFor="backend_url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Backend URL
+                    </label>
+                    <input
+                      type="text"
+                      id="backend_url"
+                      readOnly
+                      value={envSettings.backend_url}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Set via BACKEND_URL in .env; restart required to change.
                     </p>
-
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Oracle DSN (App DB)
-                      </label>
-                      <input
-                        type="text"
-                        value={appSettingsForm.oracle_db_dsn}
-                        onChange={(e) => setAppSettingsForm({ ...appSettingsForm, oracle_db_dsn: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="e.g. tecpdatp01_high"
-                      />
-                    </div>
-
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Oracle User (App DB)
-                      </label>
-                      <input
-                        type="text"
-                        value={appSettingsForm.oracle_db_user}
-                        onChange={(e) => setAppSettingsForm({ ...appSettingsForm, oracle_db_user: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="e.g. T2E"
-                      />
-                    </div>
-
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Oracle Wallet Path (App DB & NL2SQL Shared)
-                      </label>
-                      <input
-                        type="text"
-                        value={appSettingsForm.oracle_wallet_path}
-                        onChange={(e) => setAppSettingsForm({ ...appSettingsForm, oracle_wallet_path: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="/path/to/wallet_dir"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Directory containing cwallet.sso. Used if database connection requires a wallet (mTLS).
-                      </p>
-                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="cors_origins" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      CORS allowed origins
+                    </label>
+                    <input
+                      type="text"
+                      id="cors_origins"
+                      readOnly
+                      value={envSettings.cors_origins}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Set via CORS_ORIGINS in .env; restart required to change.
+                    </p>
                   </div>
                   <div>
                     <label htmlFor="oci_config_file" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -774,7 +733,7 @@ export default function SettingsPage() {
                       type="text"
                       id="oci_config_file"
                       readOnly
-                      value={appSettingsForm.oci_config_file}
+                      value={envSettings.oci_config_file}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 cursor-not-allowed"
                     />
                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -789,75 +748,15 @@ export default function SettingsPage() {
                       type="text"
                       id="oci_profile"
                       readOnly
-                      value={appSettingsForm.oci_profile}
+                      value={envSettings.oci_profile}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 cursor-not-allowed"
                     />
                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                       Set via OCI_PROFILE in .env; restart required to change.
                     </p>
                   </div>
-                  <div>
-                    <label htmlFor="api_base_url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      API base URL <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="url"
-                      id="api_base_url"
-                      required
-                      value={appSettingsForm.api_base_url}
-                      onChange={(e) => setAppSettingsForm((f) => ({ ...f, api_base_url: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-gray-100"
-                      placeholder="http://localhost:8001"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="cors_origins" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      CORS allowed origins (backend)
-                    </label>
-                    <input
-                      type="text"
-                      id="cors_origins"
-                      value={appSettingsForm.cors_origins}
-                      onChange={(e) => setAppSettingsForm((f) => ({ ...f, cors_origins: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-gray-100"
-                      placeholder="http://localhost:3000"
-                    />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      Comma-separated origins. Backend-only; restart may be required for changes.
-                    </p>
-                  </div>
-                  <div>
-                    <label htmlFor="debug_log_path" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Debug log path (backend)
-                    </label>
-                    <input
-                      type="text"
-                      id="debug_log_path"
-                      value={appSettingsForm.debug_log_path}
-                      onChange={(e) => setAppSettingsForm((f) => ({ ...f, debug_log_path: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-gray-100"
-                      placeholder="/path/to/debug.log"
-                    />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      Optional. Empty = disabled.
-                    </p>
-                  </div>
-                  <div>
-                    <label htmlFor="debug_ingest_url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Debug ingest URL (web)
-                    </label>
-                    <input
-                      type="url"
-                      id="debug_ingest_url"
-                      value={appSettingsForm.debug_ingest_url}
-                      onChange={(e) => setAppSettingsForm((f) => ({ ...f, debug_ingest_url: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-gray-100"
-                      placeholder=""
-                    />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      Optional. Empty = disabled.
-                    </p>
-                  </div>
+
+                  {/* Editable settings */}
                   <div className="pt-4 mt-6 border-t border-gray-200 dark:border-gray-700">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
                       System Prompt

@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import router as api_router
+from app.config import settings
 from app.database import init_db
 from app.app_settings import get_app_settings
 from app.mcp_manager import mcp_manager
@@ -27,7 +28,7 @@ for name in ("app", "app.mcp_manager", "app.api"):
 async def lifespan(app: FastAPI):
     """Initialize database and refresh MCP tools on startup."""
     await init_db()
-    await get_app_settings()  # Prime in-memory cache for debug_log_path etc.
+    await get_app_settings()  # Prime in-memory cache for system_prompt etc.
     await load_visibility_from_db()
     await load_description_overrides_from_db()
 
@@ -55,10 +56,12 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS middleware
+# Add CORS middleware — origins from CORS_ORIGINS env var (comma-separated)
+_cors_origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
+print(f"[STARTUP] CORS allowed origins: {_cors_origins}")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.js default port
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

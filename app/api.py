@@ -61,37 +61,23 @@ router = APIRouter(prefix="/api", tags=["api"])
 
 # --- App settings (GET/PUT) ---
 class AppSettingsUpdate(BaseModel):
-    api_base_url: Optional[str] = None
-    cors_origins: Optional[str] = None
-    debug_log_path: Optional[str] = None
-    debug_ingest_url: Optional[str] = None
-    oracle_db_dsn: Optional[str] = None
-    oracle_db_user: Optional[str] = None
-    oracle_wallet_path: Optional[str] = None
     system_prompt: Optional[str] = None
-
-    @field_validator("api_base_url")
-    @classmethod
-    def api_base_url_non_empty(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None and (not v or not v.strip()):
-            raise ValueError("api_base_url must be a non-empty URL")
-        return v.strip() if v else v
 
 
 @router.get("/settings")
 async def get_settings():
-    """Return current app settings (api_base_url, cors_origins, debug_log_path, debug_ingest_url; database_url, oci_* read-only from env)."""
+    """Return current app settings. DB-stored: system_prompt. Read-only from env: database_url, oci_*, cors_origins, backend_url."""
     data = await get_app_settings()
     
-    # If configured for Oracle, show that instead of the default SQLite URL
+    # Read-only env values
     if settings.oracle_db_dsn:
-        # Construct a display-friendly Oracle URL
         data["database_url"] = f"oracle+oracledb://{settings.oracle_db_user}:***@{settings.oracle_db_dsn}"
     else:
         data["database_url"] = settings.database_url
-        
     data["oci_config_file"] = settings.oci_config_file
     data["oci_profile"] = settings.oci_profile
+    data["backend_url"] = settings.backend_url
+    data["cors_origins"] = settings.cors_origins
     # Return the default system prompt template when not yet configured
     if not data.get("system_prompt"):
         data["system_prompt"] = DEFAULT_SYSTEM_PROMPT_TEMPLATE.strip()
@@ -100,21 +86,8 @@ async def get_settings():
 
 @router.put("/settings")
 async def put_settings(body: AppSettingsUpdate):
-    """Update app settings. Validates api_base_url (non-empty URL) and cors_origins (comma-separated)."""
+    """Update app settings. Currently only system_prompt is writable."""
     data = body.model_dump(exclude_unset=True)
-    if "api_base_url" in data and data["api_base_url"]:
-        url = data["api_base_url"].strip().rstrip("/")
-        if not url.startswith("http://") and not url.startswith("https://"):
-            raise HTTPException(status_code=400, detail="api_base_url must be a valid http(s) URL")
-        data["api_base_url"] = url
-    if "cors_origins" in data:
-        data["cors_origins"] = (data["cors_origins"] or "").strip()
-    if "oracle_db_dsn" in data:
-        data["oracle_db_dsn"] = (data["oracle_db_dsn"] or "").strip()
-    if "oracle_db_user" in data:
-        data["oracle_db_user"] = (data["oracle_db_user"] or "").strip()
-    if "oracle_wallet_path" in data:
-        data["oracle_wallet_path"] = (data["oracle_wallet_path"] or "").strip()
     if "system_prompt" in data:
         data["system_prompt"] = (data["system_prompt"] or "").strip()
     await set_app_settings(data)
@@ -1026,8 +999,7 @@ async def get_conversation_messages(
     msg_ids = [m.id for m in messages]
     attachments_by_msg: Dict[int, List[Dict[str, Any]]] = {}
     if msg_ids:
-        app_sets = await get_app_settings()
-        base_url = (app_sets.get("api_base_url") or settings.backend_url or "").strip().rstrip("/") or "http://localhost:8001"
+        base_url = (settings.backend_url or "").strip().rstrip("/") or "http://localhost:8001"
         att_result = await db.execute(
             select(ChatMessageAttachment).where(ChatMessageAttachment.message_id.in_(msg_ids))
         )
