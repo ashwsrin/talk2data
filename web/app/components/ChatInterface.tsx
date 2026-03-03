@@ -431,7 +431,7 @@ export default function ChatInterface({ conversationId, onConversationCreated, r
                         lastUserMessage,
                     ],
                     web_search_enabled: false,
-                    model_id: 'meta.llama-3.1-70b-instruct',
+                    model_id: 'openai.gpt-4o',
                 }),
             });
 
@@ -454,7 +454,7 @@ export default function ChatInterface({ conversationId, onConversationCreated, r
                     role: 'assistant' as const,
                     content: "",
                     createdAt: new Date(),
-                    model_id: 'meta.llama-3.1-70b-instruct',
+                    model_id: 'openai.gpt-4o',
                 };
 
                 // Add empty assistant message using functional update to ensure we have the user message
@@ -488,7 +488,7 @@ export default function ChatInterface({ conversationId, onConversationCreated, r
                                 role: 'assistant' as const,
                                 content: assistantMessage,
                                 createdAt: new Date(),
-                                model_id: 'meta.llama-3.1-70b-instruct',
+                                model_id: 'openai.gpt-4o',
                             }];
                         }
                     });
