@@ -29,9 +29,9 @@ export function ApiConfigProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch(url);
       if (!response.ok) return;
       const data = await response.json();
-      // backend_url from env is used for display only; frontend always uses relative URLs
-      const base = (data.backend_url || '').trim() || BOOTSTRAP_URL;
-      setApiBaseUrlState(base.replace(/\/+$/, ''));
+      // Always use relative URLs — Next.js rewrites proxy /api/* to the backend.
+      // backend_url is for server-side use only (attachment URLs etc.)
+      setApiBaseUrlState(BOOTSTRAP_URL);
       setAppSettings({
         system_prompt: data.system_prompt ?? '',
       });
