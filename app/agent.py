@@ -236,7 +236,7 @@ def create_llm(
 
 
 # Model ID for OpenAI path (used in client.responses.create)
-OPENAI_MODEL_ID = "openai.gpt-4o"
+OPENAI_MODEL_ID = "meta.llama-3.1-70b-instruct"
 
 # Initialize OpenAI-compatible client (OCI OpenAI Responses API)
 _openai_client: OciOpenAI = create_llm(
@@ -905,8 +905,8 @@ def chatbot(state: AgentState) -> AgentState:
 
     model_for_request = _get_requested_model_id()
 
-    # OpenAI-compatible path (OCI OpenAI Responses API): only for openai.* models
-    if model_for_request.startswith("openai."):
+    # OpenAI-compatible path (OCI OpenAI Responses API)
+    if True: # Bypass prefix check so Llama models work
         # Ensure every tool call has an output so OCI does not return 400 (e.g. after interrupted run / restored checkpoint)
         messages_for_input = _ensure_tool_outputs_for_all_calls(state["messages"])
         input_list = messages_to_oci_input(messages_for_input, tools=tools)
