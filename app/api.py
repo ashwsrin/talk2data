@@ -777,7 +777,7 @@ async def update_server(server_id: int, server: ServerCreate, db: AsyncSession =
     
     # Normalize JSON fields: empty strings become None
     args = server.args if server.args and server.args.strip() else None
-    env = server.env if server.env and server.env.strip() else None
+    env_vars = server.env_vars if server.env_vars and server.env_vars.strip() else None
 
     # OAuth fields: update only when provided; leave client_secret unchanged when blank (keep current)
     db_server.oauth2_access_token_url = (server.oauth2_access_token_url or "").strip() or None
@@ -795,7 +795,7 @@ async def update_server(server_id: int, server: ServerCreate, db: AsyncSession =
     db_server.api_key = api_key
     db_server.command = server.command
     db_server.args = args
-    db_server.env = env
+    db_server.env_vars = env_vars
     db_server.cwd = server.cwd if server.cwd and server.cwd.strip() else None
     db_server.include_in_llm = getattr(server, "include_in_llm", True)
     db_server.system_instruction = (server.system_instruction or "").strip() or None
