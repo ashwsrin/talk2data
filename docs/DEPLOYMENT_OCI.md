@@ -272,3 +272,28 @@ http://<YOUR_VM_PUBLIC_IP>:3000
 | `ERR_CONNECTION_TIMEOUT` on port 8001 | Port 8001 not reachable from browser | This is expected; frontend proxies via port 3000 |
 | `CORS error` in browser console | VM IP not in `CORS_ORIGINS` | Add `http://<VM_IP>:3000` to `CORS_ORIGINS` in `.env` and restart |
 | Container exits immediately | Check logs with `podman logs <container>` | Fix the reported error, then restart |
+
+
+---
+
+## Connect to removte VM
+```bash
+ssh -o User=opc -o IdentityFile=/Users/ashwins/Desktop/T2D/V3/VMKeys/ssh-key-2026-02-19.key -o ServerAliveInterval=60 -o ServerAliveCountMax=5 144.24.132.61
+```
+
+## Tunneling to remote VM and opening the app locally
+```bash
+ssh -fN -i "/Users/ashwins/Desktop/T2D/V3/VMKeys/ssh-key-2026-02-19.key" -L 127.0.0.1:3002:127.0.0.1:3000 opc@144.24.132.61
+```
+
+
+## Copy files to VM
+```bash
+scp -r -o User=opc -o IdentityFile=/Users/ashwins/Desktop/T2D/V3/VMKeys/ssh-key-2026-02-19.key -o ServerAliveInterval=60 -o ServerAliveCountMax=5 /Users/ashwins/Desktop/T2D/Wallet_TECPDATP01 144.24.132.61:/home/opc/talk2dataclient/talk2data/Wallet_TECPDATP01
+```
+
+## Kill Rogue Processes
+```bash
+lsof -i :8000
+kill -9 16484
+```
