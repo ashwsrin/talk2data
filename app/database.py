@@ -238,28 +238,33 @@ async def migrate_mcp_servers_table(conn):
             return  # Table doesn't exist yet, create_all will handle it
         
         existing_columns = list(existing_columns_dict.keys())
+        existing_cols_lower = [c.lower() for c in existing_columns]
         print(f"[MIGRATION] Existing columns in mcp_servers: {existing_columns}")
+        
+        is_oracle = conn.dialect.name == 'oracle'
+        text_type = 'CLOB' if is_oracle else 'TEXT'
+        boolean_type = 'NUMBER(1)' if is_oracle else 'BOOLEAN'
         
         # List of new columns to add
         new_columns = [
-            ('transport_type', 'TEXT NOT NULL DEFAULT \'sse\''),
-            ('exclude_optional_params', 'BOOLEAN NOT NULL DEFAULT 0'),
-            ('include_in_llm', 'BOOLEAN NOT NULL DEFAULT 1'),
-            ('system_instruction', 'TEXT'),
+            ('transport_type', f'{text_type} DEFAULT \'sse\' NOT NULL'),
+            ('exclude_optional_params', f'{boolean_type} DEFAULT 0 NOT NULL'),
+            ('include_in_llm', f'{boolean_type} DEFAULT 1 NOT NULL'),
+            ('system_instruction', text_type),
             ('command', 'VARCHAR(512)'),
-            ('args', 'TEXT'),
-            ('env_vars', 'TEXT'),
+            ('args', text_type),
+            ('env_vars', text_type),
             ('cwd', 'VARCHAR(1024)'),
-            ('oauth2_access_token_url', 'TEXT'),
-            ('oauth2_client_id', 'TEXT'),
-            ('oauth2_client_secret', 'TEXT'),
-            ('oauth2_scope', 'TEXT'),
+            ('oauth2_access_token_url', text_type),
+            ('oauth2_client_id', 'VARCHAR(255)'),
+            ('oauth2_client_secret', text_type),
+            ('oauth2_scope', text_type),
         ]
         
         # Just add missing columns
         added_count = 0
         for col_name, col_def in new_columns:
-            if col_name not in existing_columns:
+            if col_name.lower() not in existing_cols_lower:
                 try:
                     # Oracle syntax is ALTER TABLE name ADD column_name type
                     # SQLite supports ALTER TABLE name ADD COLUMN column_name type
