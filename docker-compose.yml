@@ -35,9 +35,9 @@ services:
       - .env
     volumes:
       # Mount local OCI config for SDK authentication (local dev only)
-      - ~/.oci:/root/.oci:ro
+      - ${OCI_DIR:-~/.oci}:/root/.oci:ro,z
       # Mount Oracle Wallet
-      - ~/Desktop/T2D/Wallet_TECPDATP01:/wallet:ro
+      - ${WALLET_DIR:-~/wallet}:/wallet:ro,z
     depends_on:
       - mcp-nl2sql
       - mcp-agentic
@@ -56,8 +56,8 @@ services:
       ORACLE_NL2SQL_WALLET_PATH: /wallet
       OCI_CONFIG_FILE: /root/.oci/config
     volumes:
-      - ~/.oci:/root/.oci:ro
-      - ~/Desktop/T2D/Wallet_TECPDATP01:/wallet:ro
+      - ${OCI_DIR:-~/.oci}:/root/.oci:ro,z
+      - ${WALLET_DIR:-~/wallet}:/wallet:ro,z
 
   mcp-agentic:
     build:
@@ -71,4 +71,4 @@ services:
       PYTHONUNBUFFERED: 1
       OCI_CONFIG_FILE: /root/.oci/config
     volumes:
-      - ~/.oci:/root/.oci:ro
+      - ${OCI_DIR:-~/.oci}:/root/.oci:ro,z
