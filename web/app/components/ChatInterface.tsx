@@ -296,6 +296,7 @@ export default function ChatInterface({ conversationId, onConversationCreated, r
             const base = apiBaseUrlRef.current;
             const response = await fetch(`${base}/api/conversations/${convId}/messages`, {
                 signal: options?.signal,
+                cache: 'no-store', // Prevent Next.js aggressive caching on conversation switch
             });
             if (options?.signal?.aborted) return;
             if (response.ok) {
