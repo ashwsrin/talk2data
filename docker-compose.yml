@@ -38,6 +38,9 @@ services:
       - ${OCI_DIR:-~/.oci}:/root/.oci:ro
       # Mount Oracle Wallet
       - ${ORACLE_WALLET_PATH:-~/wallet}:/wallet:ro
+    dns:
+      - 169.254.169.254
+      - 8.8.8.8
     depends_on:
       - mcp-nl2sql
       - mcp-agentic
@@ -55,6 +58,9 @@ services:
       ORACLE_WALLET_PATH: /wallet
       ORACLE_NL2SQL_WALLET_PATH: /wallet
       OCI_CONFIG_FILE: /root/.oci/config
+    dns:
+      - 169.254.169.254
+      - 8.8.8.8
     volumes:
       - ${OCI_DIR:-~/.oci}:/root/.oci:ro
       - ${ORACLE_WALLET_PATH:-~/wallet}:/wallet:ro
@@ -70,5 +76,8 @@ services:
     environment:
       PYTHONUNBUFFERED: 1
       OCI_CONFIG_FILE: /root/.oci/config
+    dns:
+      - 169.254.169.254
+      - 8.8.8.8
     volumes:
       - ${OCI_DIR:-~/.oci}:/root/.oci:ro
