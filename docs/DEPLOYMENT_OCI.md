@@ -196,6 +196,15 @@ podman-compose down
 To clean up all old containers, images, and volumes:
 ```bash
 podman system prune -a -f
+podman image prune --filter "dangling=true"
+
+# WARNING: This stops everything and deletes ALL containers, images, and non-mounted volumes
+podman-compose down -v
+podman system prune --all --force --volumes
+podman rmi -a -f
+
+# Resize the filesystem
+sudo /usr/libexec/oci-growfs -y
 ```
 
 Then pull the latest changes:
