@@ -38,12 +38,6 @@ STREAM_GRAPH_DONE = object()
 # Maximum tool invocations allowed per user question. Change this value to adjust the limit.
 MAX_TOOL_INVOCATIONS = 10
 
-# Placeholder keys for ACTIVE SERVER INSTRUCTIONS (server name hint = key with _INSTRUCTIONS removed)
-_SYSTEM_PROMPT_PLACEHOLDER_KEYS = (
-    "NL2SQL_INSTRUCTIONS",
-    "AGENTIC_TOOLS_INSTRUCTIONS",
-    "DEEPWIKI_INSTRUCTIONS",
-)
 
 
 # The default system prompt template with placeholder markers.
@@ -182,20 +176,19 @@ def build_system_prompt(servers: list, template: str = "") -> str:
     def normalize_name(name: str) -> str:
         return (name or "").upper().replace(" ", "_")
 
-    # MCP server instruction placeholders
-    for key in _SYSTEM_PROMPT_PLACEHOLDER_KEYS:
-        hint = key.replace("_INSTRUCTIONS", "")
-        placeholder = "{{" + key + "}}"
-        replacement = ""
-        for s in servers:
-            if normalize_name(getattr(s, "name", "") or "") != hint:
-                continue
-            include = bool(getattr(s, "include_in_llm", True))
-            instruction = (getattr(s, "system_instruction", None) or "").strip()
-            if include and instruction:
-                replacement = instruction
-            break
+    # Dynamic MCP server instruction placeholders
+    for s in servers:
+        server_name = normalize_name(getattr(s, "name", "") or "")
+        if not server_name:
+            continue
+        placeholder = f"{{{{{server_name}_INSTRUCTIONS}}}}"
+        include = bool(getattr(s, "include_in_llm", True))
+        instruction = (getattr(s, "system_instruction", None) or "").strip()
+        replacement = instruction if include and instruction else ""
         prompt = prompt.replace(placeholder, replacement)
+
+    # Clean up any remaining unreplaced {{..._INSTRUCTIONS}} placeholders
+    prompt = re.sub(r"\{\{[A-Z0-9_]+_INSTRUCTIONS\}\}", "", prompt)
 
     # Collapse multiple newlines and trim
     prompt = re.sub(r"\n{3,}", "\n\n", prompt)
