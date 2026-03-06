@@ -25,6 +25,22 @@ export default function ChatInterface({ conversationId, onConversationCreated, r
     const [error, setError] = useState<Error | null>(null);
     const [inputValue, setInputValue] = useState('');
     const [currentConversationId, setCurrentConversationId] = useState<number | null>(conversationId);
+    // Add selectedModel state
+    const [selectedModel, setSelectedModel] = useState('openai.gpt-4o');
+
+    // Load persisted model from localStorage
+    useEffect(() => {
+        const persistedModel = localStorage.getItem('talk2data_model_id');
+        if (persistedModel) {
+            setSelectedModel(persistedModel);
+        }
+    }, []);
+
+    const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newModel = e.target.value;
+        setSelectedModel(newModel);
+        localStorage.setItem('talk2data_model_id', newModel);
+    };
 
     // Ref to track if we're currently sending a message (to prevent reload overwriting local state)
     const isSendingMessage = useRef(false);
@@ -431,7 +447,7 @@ export default function ChatInterface({ conversationId, onConversationCreated, r
                         lastUserMessage,
                     ],
                     web_search_enabled: false,
-                    model_id: 'openai.gpt-4o',
+                    model_id: selectedModel,
                 }),
             });
 
@@ -454,7 +470,7 @@ export default function ChatInterface({ conversationId, onConversationCreated, r
                     role: 'assistant' as const,
                     content: "",
                     createdAt: new Date(),
-                    model_id: 'openai.gpt-4o',
+                    model_id: selectedModel,
                 };
 
                 // Add empty assistant message using functional update to ensure we have the user message
@@ -488,7 +504,7 @@ export default function ChatInterface({ conversationId, onConversationCreated, r
                                 role: 'assistant' as const,
                                 content: assistantMessage,
                                 createdAt: new Date(),
-                                model_id: 'openai.gpt-4o',
+                                model_id: selectedModel,
                             }];
                         }
                     });
@@ -855,6 +871,11 @@ export default function ChatInterface({ conversationId, onConversationCreated, r
                                     <span className="text-xs text-app-text-muted">
                                         {timestamp}
                                     </span>
+                                    {message.role === 'assistant' && message.model_id && (
+                                        <span className="text-[10px] text-app-text-muted/70 italic px-1 ml-1 border-l border-app-border">
+                                            {String(message.model_id)}
+                                        </span>
+                                    )}
 
                                 </div>
                             </div>
@@ -944,8 +965,15 @@ export default function ChatInterface({ conversationId, onConversationCreated, r
                         {/* Toolbar Area */}
                         <div className="flex items-center justify-between px-2 pb-2">
                             <div className="flex items-center gap-1">
-
-
+                                <select
+                                    value={selectedModel}
+                                    onChange={handleModelChange}
+                                    className="text-xs bg-transparent border border-app-border rounded p-1 text-app-text-muted outline-none focus:ring-1 focus:ring-app-accent focus:border-app-accent cursor-pointer ml-1 max-w-[150px]"
+                                    title="Select Model"
+                                >
+                                    <option value="openai.gpt-4o">gpt-4o</option>
+                                    <option value="xai.grok-4">grok-4</option>
+                                </select>
                             </div>
 
                             {/* Send Button */}

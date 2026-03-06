@@ -250,8 +250,8 @@ _openai_client: OciOpenAI = create_llm(
 )
 
 def _get_requested_model_id() -> str:
-    """Return the per-request model_id (always OPENAI_MODEL_ID)."""
-    return OPENAI_MODEL_ID
+    """Return the per-request model_id."""
+    return _model_id_var.get() or OPENAI_MODEL_ID
 
 
 def _extract_tool_calls_from_message(msg: BaseMessage) -> List[dict]:
@@ -905,8 +905,8 @@ def chatbot(state: AgentState) -> AgentState:
 
     model_for_request = _get_requested_model_id()
 
-    # OpenAI-compatible path (OCI OpenAI Responses API): only for openai.* models
-    if model_for_request.startswith("openai."):
+    # OpenAI-compatible path (OCI OpenAI Responses API): for openai.* and xai.* models
+    if model_for_request.startswith("openai.") or model_for_request.startswith("xai."):
         # Ensure every tool call has an output so OCI does not return 400 (e.g. after interrupted run / restored checkpoint)
         messages_for_input = _ensure_tool_outputs_for_all_calls(state["messages"])
         input_list = messages_to_oci_input(messages_for_input, tools=tools)

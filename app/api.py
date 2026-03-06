@@ -1233,7 +1233,7 @@ async def chat_endpoint(request: dict, background_tasks: BackgroundTasks):
                         if images or files:
                             await db.commit()
                 
-                model_id = "openai.gpt-4o"
+                model_id = request.get("model_id", "openai.gpt-4o")
                 model_image_input = True
                 model_pdf_input = True
 
