@@ -973,6 +973,8 @@ export default function ChatInterface({ conversationId, onConversationCreated, r
                                 >
                                     <option value="openai.gpt-4o">gpt-4o</option>
                                     <option value="xai.grok-4">grok-4</option>
+                                    <option value="xai.grok-4-fast-reasoning">grok-4-fast-reasoning</option>
+                                    <option value="xai.grok-4-1-fast-reasoning">grok-4-1-fast-reasoning</option>
                                 </select>
                             </div>
 
